@@ -8,8 +8,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -26,6 +28,13 @@ public class CustomView extends View
 
     //variable for the state of the game
     boolean gameOver = false;
+
+    // variable for the state of the flag mode
+    static boolean onFlagB = false;
+    static int counterFlag = 0;
+
+    // view of my textFlag
+    TextView flagNumberView;
 
     public CustomView(Context context) {
         super(context);
@@ -74,12 +83,39 @@ public class CustomView extends View
         {
             if(x < sideLength * 10 && y < sideLength * 10) // check if pixel is on the window
             {
+
                 int i = (int)event.getX()/sideLength; // get the index i
                 int j = (int)event.getY()/sideLength; // get the index j
 
-                matrixCover[j][i].unCovered = true; // set to true
+                if (onFlagB) // in flag mode
+                {
+                    if (matrixCover[j][i].marked) // if already marked
+                    {
+                        matrixCover[j][i].marked = false; // set marked to false
+                        counterFlag--;
+                        String str = counterFlag+" ⚐";
+                        flagNumberView.setText(str);
+                    }
+                    else // if not already marked
+                    {
+                        if (!matrixCover[j][i].unCovered) // if not uncovered
+                        {
+                            matrixCover[j][i].marked = true; // set marked to true
+                            counterFlag++;
+                            String str = counterFlag+" ⚐";
+                            flagNumberView.setText(str);
+                        }
+                    }
+                }
 
-                if (matrixCover[j][i].Mine) // touch a mine, so its the end of the game
+                else // not in flag mode
+                {
+                    if (!matrixCover[j][i].marked) // if not marked
+                        matrixCover[j][i].unCovered = true; // set uncovered to true
+                }
+
+
+                if (matrixCover[j][i].Mine && !onFlagB && !matrixCover[j][i].marked) // touch a mine, so its the end of the game
                 {
                     gameOver = true;
                 }
@@ -88,6 +124,7 @@ public class CustomView extends View
         postInvalidate();
         return true;
     }
+
 
     // create the 20 mines randomly
     public void mineRandom(){
@@ -104,6 +141,14 @@ public class CustomView extends View
                 counter++;
             }
         }
+    }
+
+    public static void onFlag(){ // set to flag mode
+        onFlagB = true;
+    }
+
+    public static void notOnFlag(){ // set to not flag mode
+        onFlagB = false;
     }
 
     @Override
@@ -146,18 +191,28 @@ public class CustomView extends View
                 canvas.translate(j * rectBounds, i * rectBounds);
 
                 //Draw it.
-                if (matrixCover[i][j].unCovered && matrixCover[i][j].Mine) // there is a mine
+
+                if (matrixCover[i][j].marked) // flag mode activated
                 {
-                    rectPaint.setColor(Color.RED);
+                    rectPaint.setColor(Color.YELLOW);
                 }
 
-                else // no mine
+                else // not flag mode
                 {
-                    if (matrixCover[i][j].unCovered)
-                        rectPaint.setColor(Color.GRAY); // the cell is covered
-                    else
-                        rectPaint.setColor(Color.BLACK); // the cell is not covered
+                    if (matrixCover[i][j].unCovered && matrixCover[i][j].Mine) // there is a mine
+                    {
+                        rectPaint.setColor(Color.RED);
+                    }
+
+                    else // no mine
+                    {
+                        if (matrixCover[i][j].unCovered)
+                            rectPaint.setColor(Color.GRAY); // the cell is covered
+                        else
+                            rectPaint.setColor(Color.BLACK); // the cell is not covered
+                    }
                 }
+
 
                 canvas.drawRect(square, rectPaint); // draw each cell
 

@@ -6,13 +6,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.text.BreakIterator;
 
 public class MainActivity extends AppCompatActivity {
+
+    // custom view
+    public CustomView customView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // id of custom view
+        customView = findViewById(R.id.customview);
+        
+        //id of textview
+        customView.flagNumberView = findViewById(R.id.numberOfFlag);
+
+        customView.onFlagB = false;
+        customView.counterFlag = 0;
 
         // button restart
         Button btnReset = (Button) findViewById(R.id.ButtomReset);
@@ -25,6 +41,27 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
-    }
 
+        final boolean[] markingMode = {false}; // mode of the flag
+
+        // button switch flag
+        Button btnFlag = (Button) findViewById(R.id.SwitchFlag);
+        btnFlag.setOnClickListener( new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (markingMode[0])
+                {
+                    btnFlag.setText("Marking");
+                    customView.notOnFlag();
+                }
+                else
+                {
+                    btnFlag.setText("Uncover");
+                    customView.onFlag();
+                }
+                markingMode[0] = !markingMode[0];
+            }
+        });
+    }
 }
