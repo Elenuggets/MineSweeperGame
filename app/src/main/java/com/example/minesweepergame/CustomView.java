@@ -24,6 +24,9 @@ public class CustomView extends View
     // variable for my cell matrix
     Cell[][] matrixCover = new Cell[10][10];
 
+    //variable for the state of the game
+    boolean gameOver = false;
+
     public CustomView(Context context) {
         super(context);
     }
@@ -67,7 +70,7 @@ public class CustomView extends View
 
         int action = event.getActionMasked(); // get the action
 
-        if (action == MotionEvent.ACTION_DOWN)
+        if (action == MotionEvent.ACTION_DOWN && !gameOver)
         {
             if(x < sideLength * 10 && y < sideLength * 10) // check if pixel is on the window
             {
@@ -75,6 +78,11 @@ public class CustomView extends View
                 int j = (int)event.getY()/sideLength; // get the index j
 
                 matrixCover[j][i].unCovered = true; // set to true
+
+                if (matrixCover[j][i].Mine) // touch a mine, so its the end of the game
+                {
+                    gameOver = true;
+                }
             }
         }
         postInvalidate();
