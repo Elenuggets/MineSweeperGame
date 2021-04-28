@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -19,6 +20,9 @@ public class CustomView extends View
     private Paint rectPaint;
     Rect square;
     int sideLength;
+
+    // variable for my cell matrix
+    Cell[][] matrixCover = new Cell[10][10];
 
     public CustomView(Context context) {
         super(context);
@@ -39,6 +43,40 @@ public class CustomView extends View
         //Set the background color.
         setBackgroundColor(Color.rgb(255,255,255));
 
+        //init the matrix of cell
+        for (int i = 0; i<10;i++)
+        {
+            for (int j=0; j<10;j++)
+            {
+                Cell cell = new Cell();
+                cell.cellInit();
+                matrixCover[i][j] = cell;
+            }
+        }
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+
+        int x = (int)event.getX(); // get the pixel x
+        int y = (int)event.getY(); // get the pixel y
+
+        int action = event.getActionMasked(); // get the action
+
+        if (action == MotionEvent.ACTION_DOWN)
+        {
+            if(x < sideLength * 10 && y < sideLength * 10) // check if pixel is on the window
+            {
+                int i = (int)event.getX()/sideLength; // get the index i
+                int j = (int)event.getY()/sideLength; // get the index j
+
+                matrixCover[j][i].unCovered = true; // set to true
+            }
+        }
+        postInvalidate();
+        return true;
     }
 
     @Override
@@ -81,8 +119,12 @@ public class CustomView extends View
                 canvas.translate(j * rectBounds, i * rectBounds);
 
                 //Draw it.
-                rectPaint.setColor(Color.BLACK);
-                canvas.drawRect(square, rectPaint);
+                if (matrixCover[i][j].unCovered)
+                    rectPaint.setColor(Color.GRAY); // the cell is covered
+                else
+                    rectPaint.setColor(Color.BLACK); // the cell is not covered
+
+                canvas.drawRect(square, rectPaint); // draw each cell
 
                 //Restore. Back to the origin.
                 canvas.restore();
