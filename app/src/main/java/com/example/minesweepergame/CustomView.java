@@ -54,6 +54,8 @@ public class CustomView extends View
             }
         }
 
+        mineRandom(); // create the mine randomly
+
     }
 
     @Override
@@ -77,6 +79,23 @@ public class CustomView extends View
         }
         postInvalidate();
         return true;
+    }
+
+    // create the 20 mines randomly
+    public void mineRandom(){
+        int Max = 9; // the max index in the square
+        int Min = 0; // the min index in the square
+        int counter = 0; // counter of mines
+        while (counter != 20) // for have 20 mines
+        {
+            int x = (int) (Math.random() * ( Max - Min ));
+            int y = (int) (Math.random() * ( Max - Min ));
+            if (!matrixCover[x][y].Mine)
+            {
+                matrixCover[x][y].Mine = true;
+                counter++;
+            }
+        }
     }
 
     @Override
@@ -119,12 +138,31 @@ public class CustomView extends View
                 canvas.translate(j * rectBounds, i * rectBounds);
 
                 //Draw it.
-                if (matrixCover[i][j].unCovered)
-                    rectPaint.setColor(Color.GRAY); // the cell is covered
-                else
-                    rectPaint.setColor(Color.BLACK); // the cell is not covered
+                if (matrixCover[i][j].unCovered && matrixCover[i][j].Mine) // there is a mine
+                {
+                    rectPaint.setColor(Color.RED);
+                }
+
+                else // no mine
+                {
+                    if (matrixCover[i][j].unCovered)
+                        rectPaint.setColor(Color.GRAY); // the cell is covered
+                    else
+                        rectPaint.setColor(Color.BLACK); // the cell is not covered
+                }
 
                 canvas.drawRect(square, rectPaint); // draw each cell
+
+                // for display the 'M'
+                if (matrixCover[i][j].unCovered && matrixCover[i][j].Mine)
+                {
+                    // draw the 'M'
+                    Paint paint = new Paint();
+                    paint.setColor(Color.BLACK); // set the color to black
+                    paint.setTextSize(70); // set the size
+                    paint.setStyle(Paint.Style.FILL); // set text to fill
+                    canvas.drawText("M", j+(sideLength/4), i+(sideLength*3/4), paint);
+                }
 
                 //Restore. Back to the origin.
                 canvas.restore();
