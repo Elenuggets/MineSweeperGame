@@ -45,23 +45,39 @@
             />
         />
 
-        <Button
+        <Switch
             android:id="@+id/SwitchFlag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textOn="⚑"
+            android:textOff="⚐"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="25dp"
             android:showText="true"
-            android:text="Marking" />
+            android:thumb="@drawable/custom_thumb"
+            android:track="@drawable/custom_track"
+
+            />
 
     </LinearLayout>
 
     <com.example.minesweepergame.CustomView
         android:id="@+id/customview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="413dp"
         android:layout_marginTop="30dp"
 
         />
+
+    <TextView
+        android:id="@+id/winText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" "
+        android:layout_gravity="center"
+        android:textSize="25sp"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="15dp"  />
 
 </LinearLayout>

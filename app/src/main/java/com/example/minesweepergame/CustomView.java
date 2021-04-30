@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -27,7 +28,7 @@ public class CustomView extends View
     Cell[][] matrixCover = new Cell[10][10];
 
     //variable for the state of the game
-    boolean gameOver = false;
+    public static boolean gameOver = false;
 
     // variable for the state of the flag mode
     static boolean onFlagB = false;
@@ -35,6 +36,9 @@ public class CustomView extends View
 
     // view of my textFlag
     TextView flagNumberView;
+
+    // view of my textWin
+    TextView winView;
 
     public CustomView(Context context) {
         super(context);
@@ -98,7 +102,7 @@ public class CustomView extends View
                     }
                     else // if not already marked
                     {
-                        if (!matrixCover[j][i].unCovered) // if not uncovered
+                        if (!matrixCover[j][i].unCovered && counterFlag!=20) // if not uncovered
                         {
                             matrixCover[j][i].marked = true; // set marked to true
                             counterFlag++;
@@ -112,15 +116,26 @@ public class CustomView extends View
                 {
                     if (!matrixCover[j][i].marked) // if not marked
                         matrixCover[j][i].unCovered = true; // set uncovered to true
+                    if (numberDisplay(j,i)==0 && !matrixCover[j][i].Mine)
+                    {
+                        dispatch(j,i);
+                        Log.d("Debug","APPEL DISPATCH");
+                    }
                 }
 
 
                 if (matrixCover[j][i].Mine && !onFlagB && !matrixCover[j][i].marked) // touch a mine, so its the end of the game
                 {
                     gameOver = true;
+                    winView.setText("Game over ! You lost..");
                 }
             }
+            if (isWin())
+                winView.setText("Good game ! You win :)");
         }
+
+
+
         postInvalidate();
         return true;
     }
@@ -213,11 +228,18 @@ public class CustomView extends View
                     }
                 }
 
+                if (gameOver)
+                {
+                    if (matrixCover[i][j].Mine)
+                    {
+                        rectPaint.setColor(Color.RED);
+                    }
+                }
 
                 canvas.drawRect(square, rectPaint); // draw each cell
 
                 // for display the 'M'
-                if (matrixCover[i][j].unCovered && matrixCover[i][j].Mine)
+                if ((matrixCover[i][j].unCovered && matrixCover[i][j].Mine) ||(matrixCover[i][j].Mine && gameOver))
                 {
                     // draw the 'M'
                     Paint paint = new Paint();
@@ -227,9 +249,129 @@ public class CustomView extends View
                     canvas.drawText("M", j+(sideLength/4), i+(sideLength*3/4), paint);
                 }
 
+                //get the number and display for the mine aroud the case
+                if (matrixCover[i][j].unCovered && !matrixCover[i][j].Mine)
+                {
+                    int value = numberDisplay(i,j);
+                    if (value!=0)
+                    {
+                        Paint paint = new Paint();
+                        paint.setColor(Color.BLACK); // set the color to black
+                        paint.setTextSize(70); // set the size
+                        paint.setStyle(Paint.Style.FILL); // set text to fill
+                        canvas.drawText(""+value, j+(sideLength/4), i+(sideLength*3/4), paint);
+                    }
+                }
+
                 //Restore. Back to the origin.
                 canvas.restore();
             }
         }
+    }
+
+
+    public void dispatch(int i, int j){
+        if (i<9 && !matrixCover[i+1][j].unCovered)
+        {
+            matrixCover[i+1][j].unCovered = true;
+            if (numberDisplay(i+1,j)==0)
+                dispatch(i+1,j);
+        }
+        if (i>0 && !matrixCover[i-1][j].unCovered)
+        {
+            matrixCover[i-1][j].unCovered = true;
+            if (numberDisplay(i-1,j)==0)
+                dispatch(i-1,j);
+        }
+        if (j<9 && !matrixCover[i][j+1].unCovered)
+        {
+            matrixCover[i][j+1].unCovered = true;
+            if (numberDisplay(i,j+1)==0)
+                dispatch(i,j+1);
+        }
+        if (j>0 && !matrixCover[i][j-1].unCovered)
+        {
+            matrixCover[i][j-1].unCovered = true;
+            if (numberDisplay(i,j-1)==0)
+                dispatch(i,j-1);
+        }
+        if (i<9 && j<9 && !matrixCover[i+1][j+1].unCovered)
+        {
+            matrixCover[i+1][j+1].unCovered = true;
+            if (numberDisplay(i+1,j+1)==0)
+                dispatch(i+1,j+1);
+        }
+        if (i>0 && j<9  && !matrixCover[i-1][j+1].unCovered)
+        {
+            matrixCover[i-1][j+1].unCovered = true;
+            if (numberDisplay(i-1,j+1)==0)
+                dispatch(i-1,j+1);
+        }
+        if (i<9 && j>0 && !matrixCover[i+1][j-1].unCovered)
+        {
+            matrixCover[i+1][j-1].unCovered = true;
+            if (numberDisplay(i+1,j-1)==0)
+                dispatch(i+1,j-1);
+        }
+        if (i>0 && j>0 && !matrixCover[i-1][j-1].unCovered)
+        {
+            matrixCover[i-1][j-1].unCovered = true;
+            if (numberDisplay(i-1,j-1)==0)
+                dispatch(i-1,j-1);
+        }
+    }
+
+
+    // return a booleen if win
+    public boolean isWin (){
+        int counter = 0;
+        for(int i=0; i<9;i++){
+            for (int j=0;j<9;j++){
+                if (matrixCover[i][j].marked && matrixCover[i][j].Mine)
+                    counter++;
+            }
+        }
+        Log.d("DEBUG",counter+" BOMBEs");
+        if (counter==20)
+            Log.d("DEBUG","YOU WIN");
+        return counter==20;
+    }
+
+    // display the number
+    public int numberDisplay(int i,int j){
+        int counter = 0;
+        if (i<9 && matrixCover[i+1][j].Mine)
+        {
+            counter++;
+        }
+        if (i>0 && matrixCover[i-1][j].Mine)
+        {
+            counter++;
+        }
+        if (j<9 && matrixCover[i][j+1].Mine)
+        {
+            counter++;
+        }
+        if (j>0 && matrixCover[i][j-1].Mine)
+        {
+            counter++;
+        }
+        if (i<9 && j<9 && matrixCover[i+1][j+1].Mine)
+        {
+            counter++;
+        }
+        if (i>0 && j<9 && matrixCover[i-1][j+1].Mine)
+        {
+            counter++;
+        }
+        if (i<9 && j>0 && matrixCover[i+1][j-1].Mine)
+        {
+            counter++;
+        }
+        if (i>0 && j>0 && matrixCover[i-1][j-1].Mine)
+        {
+            counter++;
+        }
+        return counter;
     }
 }

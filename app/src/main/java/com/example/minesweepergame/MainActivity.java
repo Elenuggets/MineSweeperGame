@@ -27,8 +27,12 @@ public class MainActivity extends AppCompatActivity {
         //id of textview
         customView.flagNumberView = findViewById(R.id.numberOfFlag);
 
+        //if of textwin
+        customView.winView = findViewById(R.id.winText);
+
         customView.onFlagB = false;
         customView.counterFlag = 0;
+        customView.gameOver = false;
 
         // button restart
         Button btnReset = (Button) findViewById(R.id.ButtomReset);
@@ -52,16 +56,18 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (markingMode[0])
                 {
-                    btnFlag.setText("Marking");
+                    //btnFlag.setText("Marking");
                     customView.notOnFlag();
                 }
                 else
                 {
-                    btnFlag.setText("Uncover");
+                    //btnFlag.setText("Uncover");
                     customView.onFlag();
                 }
                 markingMode[0] = !markingMode[0];
             }
         });
+
+
     }
 }
